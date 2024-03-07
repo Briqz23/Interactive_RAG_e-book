@@ -1,0 +1,14 @@
+langchain 
+openai 
+pypdf 
+tiktoken 
+faiss-cpu 
+datasets 
+pandas  
+python-dotenv
+sentence-transformers
+#faiss-gpu
+transformers
+accelerate
+bitsandbytes
+
