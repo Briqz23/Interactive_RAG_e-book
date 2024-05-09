@@ -1,0 +1,16 @@
+Krish Naik youtube series over langchain
+
+1. [chatbot folder] app_openai.py:
+simple streamlit chat conversation based on app_openai
+
+2. [chatbot folder]app_ollama.py:
+same simple implementation, but with a light open source model from ollama
+
+3. langchain --upgrade, python app.py e streamlit run client.py
+a simple API using langserve 
+
+4. basic pipe line: load pdf, txt and website --> splitting/chunking --> vector embedding and vector store --> similarity search on FAISS and Chroma
+
+5-6. adding agents which do queries in different places by using different tools! The agent collects the best answer he can find among the different sources.
+
+7.Groq and not being able to run because bad laptop ha
