@@ -1,7 +1,7 @@
 # Testing RAG using Alice's Adventures in Wonderland as data
 
 
-## GCSP e Holanda 🇳
+## GCSP e Holanda
 
 Research intended for my International GCSP program research, where I will delve into the Netherlands - where I will spend a semester studying artificial intelligence (grad - exchange program).
 

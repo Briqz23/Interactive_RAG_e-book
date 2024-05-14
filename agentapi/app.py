@@ -9,12 +9,7 @@ from langchain.tools.retriever import create_retriever_tool
 from fastapi import FastAPI
 from pydantic import BaseModel
 from langchain.agents import create_openai_tools_agent, AgentExecutor
-from langchain.prompts import (
-    ChatPromptTemplate,
-    SystemMessagePromptTemplate,
-    HumanMessagePromptTemplate,
-    MessagesPlaceholder,
-)
+from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate, MessagesPlaceholder
 import os
 from dotenv import load_dotenv
 
@@ -47,7 +42,7 @@ def load_and_split(loader, splitter, embeddings):
     return db
 
 web_db = load_and_split(WebBaseLoader("https://www.studypool.com/studyGuides/Alice_in_Wonderland/Characters"), 
-                          RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=200), 
+                          RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP), 
                           OpenAIEmbeddings())
 
 pdf_db = load_and_split(PyPDFLoader('alice_in_wonderland.pdf'), 
