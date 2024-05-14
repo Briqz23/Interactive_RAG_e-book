@@ -18,71 +18,73 @@ from langchain.prompts import (
 import os
 from dotenv import load_dotenv
 
-#Using API for wikipedia content - this will later be implemented in the "tools" for the agent
+# Constants
+TOP_K_RESULTS = 1
+DOCUMENT_CONTENT_CHARS_MAX = 400
+CHUNK_SIZE = 1000
+CHUNK_OVERLAP = 200
 
-api_wrapper = WikipediaAPIWrapper(top_k_results=1,document_content_chars_max=400)   
+# Load environment variables
+
+load_dotenv()
+os.environ['LANGCHAIN_TRACING_V2'] = 'true'
+os.environ['LANGCHAIN_API_KEY'] = os.getenv('LANGCHAIN_API_KEY', 'nao encontrada')
+os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY', 'nao encontraaada')
+
+
+#  Using API for wikipedia content - this will later be implemented in the "tools" for the agent
+
+api_wrapper = WikipediaAPIWrapper(top_k_results=TOP_K_RESULTS,document_content_chars_max=DOCUMENT_CONTENT_CHARS_MAX)   
 wiki = WikipediaQueryRun(api_wrapper = api_wrapper)
 
 
+# Loading the content from the web and splitting the text into chunks to be used in the FAISS
+# PDF loader and splitting the text into chunks to be used in the FAISS
+def load_and_split(loader, splitter, embeddings):
+    docs = loader.load()
+    documents = splitter.split_documents(docs)
+    db = FAISS.from_documents(documents, embeddings)
+    return db
 
-#Loading the content from the web and splitting the text into chunks to be used in the FAISS
+web_db = load_and_split(WebBaseLoader("https://www.studypool.com/studyGuides/Alice_in_Wonderland/Characters"), 
+                          RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=200), 
+                          OpenAIEmbeddings())
 
-loader = WebBaseLoader("https://www.studypool.com/studyGuides/Alice_in_Wonderland/Characters")
-docs = loader.load()
-RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200).split_documents(docs)
-vectordb = FAISS.from_documents(docs, OpenAIEmbeddings())
-
-
-#PDF loader and splitting the text into chunks to be used in the FAISS
-
-loaderPDF = PyPDFLoader('alice_in_wonderland.pdf')
-docsPDF = loaderPDF.load()
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=200)
-documents = text_splitter.split_documents(docsPDF)
-db2 = FAISS.from_documents(documents[:20], OpenAIEmbeddings())
-
-#combining the two FAISS databases (PDF and Web content)
-vectordb.merge_from(db2)
+pdf_db = load_and_split(PyPDFLoader('alice_in_wonderland.pdf'), 
+                        RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP), 
+                        OpenAIEmbeddings())
 
 
+def combine_databases(db1, db2):
+    db1.merge_from(db2)
+    return db1
 
-#Create a retriever interface to interact with the FAISS vector database and retrieve relevant documents based on queries.
+vectordb = combine_databases(web_db, pdf_db)
+
+
+
+# Create a retriever interface to interact with the FAISS vector database and retrieve relevant documents based on queries.
 
 retriever = vectordb.as_retriever() 
 retriever
 
-#creating the retriever tool as in https://api.python.langchain.com/en/latest/tools/langchain.tools.retriever.create_retriever_tool.html 
-#this tool will be used to query for information in the FAISS database
+# creating the retriever tool as in https://api.python.langchain.com/en/latest/tools/langchain.tools.retriever.create_retriever_tool.html 
+# this tool will be used to query for information in the FAISS database
 
 retriever_tool = create_retriever_tool(retriever, "langsmith_search", "search about information regarding Alice in Wonderland. Try to trace a personality she might have met in the story.")
 retriever_tool.name
 
 
-##Arxiv Tool search: for academic papers
+# Arxiv Tool search: for academic papers
 
-arxiv_wrapper = ArxivAPIWrapper(top_k_results=1,document_content_chars_max=200)
+arxiv_wrapper = ArxivAPIWrapper(top_k_results=TOP_K_RESULTS,document_content_chars_max=DOCUMENT_CONTENT_CHARS_MAX)
 arxiv = ArxivQueryRun(arxiv_wrapper = arxiv_wrapper)
 
+#creating the prompt for the agent
 #if the agent doenst find the information on wiki, it goes to retriever_tool then arxiv - different sources making this a multimodal agent
+llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 tools = [wiki, retriever_tool, arxiv] 
 
-load_dotenv()
-
-os.environ['LANGCHAIN_TRACING_V2'] = 'true'
-os.environ['LANGCHAIN_API_KEY'] = os.getenv('LANGCHAIN_API_KEY', 'nao encontrada')
-os.environ['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY', 'nao encontraaada')
-
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
-
-
-#criando o prompt de uma forma diferente - pegando da comunidade
-
-#https://smith.langchain.com/hub/rlm/rag-prompt
-#prompt = hub.pull("hwchase17/openai-functions-agent")
-#prompt.messages
-
-
-#creating the prompt for the agent
 prompt = ChatPromptTemplate.from_messages([
     SystemMessagePromptTemplate.from_template("You are in the context of Alices wonderland characters."),
     HumanMessagePromptTemplate.from_template("{input}"),
@@ -90,7 +92,6 @@ prompt = ChatPromptTemplate.from_messages([
 ])
 
 agent = create_openai_tools_agent(llm, tools, prompt)
-
 agent_executer = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
 
@@ -107,7 +108,7 @@ description = ["Alice responds to the user with curiosity and politeness, often 
                "The Mad Hatter engages in wordplay and riddles, giving eccentric and unconventional responses that may seem nonsensical or illogical, while enjoying tea parties and discussing peculiar topics",
                "The Cheshire Cat speaks in riddles and paradoxes, offering mysterious and thought-provoking answers, and may appear and disappear unexpectedly.",
                'The Queen of Hearts, with an authoritative and demanding demeanor, responds with a sense of superiority and impatience, issuing commands and threats, and is prone to anger and shouting "Off with their head!"']
-
+               
 def get_agent_executor(character, index) -> AgentExecutor:
     prompt = ChatPromptTemplate.from_messages([
         SystemMessagePromptTemplate.from_template(f"You are {character} from Alice's Wonderland. {description[index]}"),
@@ -135,3 +136,7 @@ app.post("/white-rabbit")(create_endpoint("White Rabbit"))
 app.post("/mad-hatter")(create_endpoint("Mad Hatter"))
 app.post("/cheshire-cat")(create_endpoint("Cheshire Cat"))
 app.post("/queen-of-hearts")(create_endpoint("Queen of Hearts"))
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
