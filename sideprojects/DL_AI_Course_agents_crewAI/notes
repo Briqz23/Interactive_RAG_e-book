@@ -1,0 +1,27 @@
+4 agents:
+    - Tech job researcher
+    - Personal profiler for egeneers
+    - Resume Strategist for engineers
+    - Engineering Intervew preparer
+
+actions:
+    - web search
+    - read websites
+    - read resume
+    - performa RAG on resume
+
+final goal: re-write and re-frame the important skills from his resume based on the job description
+
+____
+
+qualidades  de um agente:
+    - roleplaying - if you were to hire someone, who would be? backstory? goals? bahavior?
+    - focus - the more specific the better - llm in general works worse if its generalist
+    - tools - versitile (handle different things llm my throw at them, so converting properly, understanding different things),
+                        failure tolerant and caching
+            - examples: search the internet, scrape website, connect to db, call api, send notifications
+                            
+    - cooperation
+    - guardrails - prevents agents going on rabbit holes / repeating
+    - memory (most important! Long and short term memory from other agents, context, previous agent work)
+

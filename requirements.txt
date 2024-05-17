@@ -20,3 +20,5 @@ arxiv
 langchainhub
 langchain 
 ipykernel
+crewai==0.28.8
+crewai_tools==0.1.6
