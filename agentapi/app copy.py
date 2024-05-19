@@ -56,10 +56,10 @@ def load_and_split(loader, splitter, embeddings):
     db = FAISS.from_documents(documents, embeddings)
     return db
 
-web_db = load_and_split(WebBaseLoader("https://www.studypool.com/studyGuides/Alice_in_Wonderland/Characters"), 
+web_db = vectordb = load_and_split(WebBaseLoader("https://www.studypool.com/studyGuides/Alice_in_Wonderland/Characters"), 
                           RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP), 
                           OpenAIEmbeddings())
-
+"""
 pdf_db = load_and_split(PyPDFLoader('alice_in_wonderland.pdf'), 
                         RecursiveCharacterTextSplitter(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP), 
                         OpenAIEmbeddings())
@@ -71,7 +71,7 @@ def combine_databases(db1, db2):
 
 vectordb = combine_databases(web_db, pdf_db)
 
-
+"""
 
 # Create a retriever interface to interact with the FAISS vector database and retrieve relevant documents based on queries.
 
@@ -150,12 +150,13 @@ conversational_rag_chain = RunnableWithMessageHistory(
 )
 
 conversational_rag_chain.invoke(
-    {"input": "What is did I just ask?"},
+    {"input": "What were we talkin about?"},
     config={
-        "configurable": {"session_id": "abc123"}
+        "configurable": {"session_id": "abc1233"}
     },  # constructs a key "abc123" in `store`.
 )["answer"]
 print(store)
+
 """
 
 #agent prompt
