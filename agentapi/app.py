@@ -12,11 +12,10 @@ from langchain.agents import create_openai_tools_agent, AgentExecutor
 from langchain.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate, MessagesPlaceholder
 import os
 from dotenv import load_dotenv
+
+from langchain.chains import create_history_aware_retriever
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
-from langchain_community.chat_message_histories import ChatMessageHistory
-from langchain_core.chat_history import BaseChatMessageHistory
-from langchain_core.runnables.history import RunnableWithMessageHistory
 
 # Constants
 TOP_K_RESULTS = 1
@@ -87,10 +86,14 @@ llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 tools = [wiki, retriever_tool, arxiv] 
 #agent prompt
 contextualize_q_prompt = ChatPromptTemplate.from_messages([
+    MessagesPlaceholder("chat_history"),
     SystemMessagePromptTemplate.from_template("You are an AI agent in the context of Alices wonderland characters."),
     HumanMessagePromptTemplate.from_template("{input}"), #input = question
     MessagesPlaceholder(variable_name="agent_scratchpad")
 ])
+history_aware_retriever = create_history_aware_retriever(
+    llm, retriever, contextualize_q_prompt
+)
 
 agent = create_openai_tools_agent(llm, tools, contextualize_q_prompt)
 agent_executer = AgentExecutor(agent=agent, tools=tools, verbose=True)
@@ -109,60 +112,27 @@ description = ["Alice responds to the user with curiosity and politeness, often 
                "The Mad Hatter engages in wordplay and riddles, giving eccentric and unconventional responses that may seem nonsensical or illogical, while enjoying tea parties and discussing peculiar topics",
                "The Cheshire Cat speaks in riddles and paradoxes, offering mysterious and thought-provoking answers, and may appear and disappear unexpectedly.",
                'The Queen of Hearts, with an authoritative and demanding demeanor, responds with a sense of superiority and impatience, issuing commands and threats, and is prone to anger and shouting "Off with their head!"']
-
+chat_history = []
 def get_agent_executor(character, index) -> AgentExecutor:
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            SystemMessagePromptTemplate.from_template(f"You are {character} from Alice's Wonderland. {description[index]}"),
-            MessagesPlaceholder(variable_name="history"),
-            HumanMessagePromptTemplate.from_template("{input}"),
-            MessagesPlaceholder(variable_name="agent_scratchpad")
-        ]
-    )   
-    runnable = prompt | llm
-
-    # Aqui, criamos o `with_message_history` específico para este executor
-    with_message_history = RunnableWithMessageHistory(
-        runnable,
-        get_session_history,
-        input_messages_key="input",
-        history_messages_key="history",
-    )
+    prompt = ChatPromptTemplate.from_messages([
+        SystemMessagePromptTemplate.from_template(f"You are {character} from Alice's Wonderland. {description[index]}. Also use the {chat_history} to provide context for next answer."),
+        HumanMessagePromptTemplate.from_template("{input}"),
+        MessagesPlaceholder(variable_name="agent_scratchpad")
+    ])
 
     agent = create_openai_tools_agent(llm, tools, prompt)
-    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, runnable=with_message_history)
+    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
     return agent_executor
-store = {}
-
-def get_session_history(session_id: str) -> BaseChatMessageHistory:
-    if session_id not in store:
-        store[session_id] = ChatMessageHistory()
-    return store[session_id]
-
 
 agent_executors = {character: get_agent_executor(character, index) for index, character in enumerate(characters)}
 
 class PromptRequest(BaseModel):
     prompt: str
-    session_id: str  # Adicionamos o session_id aqui
 
 def create_endpoint(character: str):
     async def endpoint(request: PromptRequest):
-        session_id = request.session_id
-        agent_executor, runnable = agent_executors[character]
-        history = get_session_history(session_id)  # Recuperamos o histórico da sessão
-
-        # Agora, invocamos o executor com o histórico de mensagens
-        response = agent_executor.invoke(
-            {"input": request.prompt, "history": history.messages},
-            config={"configurable": {"session_id": session_id}},
-        )
-
-        # Atualizamos o histórico de mensagens após a invocação
-        history.update_messages(response["output"]["messages"])
-
-        return response
+        return agent_executors[character].invoke({"input": request.prompt})
     return endpoint
 
 app.post("/alice")(create_endpoint("Alice"))
