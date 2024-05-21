@@ -1,6 +1,6 @@
 import streamlit as st
 import requests
-from urllib.parse import quote
+
 def main():
     st.title("Alice's Wonderland Character Interaction")
 
