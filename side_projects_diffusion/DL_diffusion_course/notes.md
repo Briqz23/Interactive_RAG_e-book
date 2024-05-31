@@ -48,9 +48,11 @@ ___
 - U-Net is effective for image segmentation, allowing the capture and integration of information at multiple scales through its symmetric structure and the use of skip connections.
 
 
-<img src="../imgs/unet_architecture.png" alt="U-Net Architecture" width="600">
+<img src="/side_projects_diffusion/DL_diffusion_course/imgs/unet_architecture.png" alt="U-Net Architecture" width="600">
 
-<img src="../imgs/encoder_decoder_skipconnections.png" alt="Encoder-Decoder with Skip Connections" width="600">
+<img src="/side_projects_diffusion/DL_diffusion_course/imgs/encoder_decoder_skipconnections.png" alt="Encoder-Decoder with Skip Connections" width="600">
+
+<img src="/side_projects_diffusion/DL_diffusion_course/side_projects_diffusion/imgs/encoder_decoder_skipconnections.png" alt="Encoder-Decoder with Skip Connections" width="600">
 ___
 ___
 ___
@@ -60,7 +62,7 @@ ___
 The objective is to train a neural network to predict noise by teaching it to differentiate between noise and non-noise.
 
 #### Training Steps:
-<img src="../imgs/training_flow.png" alt="Training flow on code" width="600">
+<img src="/side_projects_diffusion/DL_diffusion_course/imgs/training_flow.png" alt="Training flow on code" width="600">
 
 
 1. **Combining Sprite and Noise:**
@@ -91,7 +93,7 @@ The objective is to train a neural network to predict noise by teaching it to di
   - Using multiple losses over different epochs improves the neural network's learning efficiency, allowing for faster and more accurate convergence.
 
 
-<img src="../imgs/epoches.png" alt="epoches" width="400">
+<img src="/side_projects_diffusion/DL_diffusion_course/imgs/epoches.png" alt="epoches" width="400">
 ### Conclusion
 
 This training method enables the neural network to develop a refined ability to predict noise in images, making it an effective tool for applications that require noise reduction or identification.
@@ -117,7 +119,7 @@ Each embedding is associated with a description or caption. During sampling time
 
 ### Controlling Architecture:
 
-<img src="../imgs/controlling_architecture.png" alt="Controlling Architecture" width="500">
+<img src="/side_projects_diffusion/DL_diffusion_course/imgs/controlling_architecture.png" alt="Controlling Architecture" width="500">
 
 ## What is Context?
 - Context is a vector used to control generations.
@@ -127,7 +129,7 @@ Embeddings can be embedded in various dimensions. Below are visual representatio
 
 ### Context Embedding:
 
-<img src="../imgs/context.png" alt="Context Embedding" width="500">
+<img src="/side_projects_diffusion/DL_diffusion_course/imgs/context.png" alt="Context Embedding" width="500">
 
 ### Mixing Context:
 
