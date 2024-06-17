@@ -4,7 +4,7 @@ from langchain.agents import create_openai_tools_agent, AgentExecutor
 
 def get_agent_executor(character, description, tools, model="gpt-3.5-turbo", temperature=0):
     prompt = ChatPromptTemplate.from_messages([
-        SystemMessagePromptTemplate.from_template(f"You are {character} from Alice's Wonderland. {description}"),
+        SystemMessagePromptTemplate.from_template(f"YOU NEED TO TALK AS IF YOU WERE{character}!! from Alice's Wonderland. Understand this context:{description}"),
         HumanMessagePromptTemplate.from_template("{input}"),
         MessagesPlaceholder(variable_name="agent_scratchpad")
     ])

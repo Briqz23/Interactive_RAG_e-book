@@ -18,7 +18,7 @@ def create_app(agent_executors):
     )
 
     app.post("/alice")(create_endpoint(agent_executors, "Alice"))
-    app.post("/white-rabbit")(create_endpoint(agent_executors, "White Rabbit"))
+    app.post("/caterpillar")(create_endpoint(agent_executors, "Caterpillar"))
     app.post("/mad-hatter")(create_endpoint(agent_executors, "Mad Hatter"))
     app.post("/cheshire-cat")(create_endpoint(agent_executors, "Cheshire Cat"))
     app.post("/queen-of-hearts")(create_endpoint(agent_executors, "Queen of Hearts"))

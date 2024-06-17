@@ -18,9 +18,9 @@ Research intended for my International GCSP program research, where I will delve
 
 ### Install the requirements
 
-    pip install -r requirements-diffusiin.txt
+    pip install -r requirements_diffusion.txt
     
-    pip install -r requirements-LLM.txt
+    pip install -r requirements_LLM.txt
 
 ### How to run
 
