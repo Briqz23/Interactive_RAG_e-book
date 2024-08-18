@@ -1,5 +1,7 @@
 # Testing RAG using Alice's Adventures in Wonderland as data
 
+[![Demo]](https://youtu.be/fdQ2I20hkBU)
+
 
 ## GCSP e Holanda
 
