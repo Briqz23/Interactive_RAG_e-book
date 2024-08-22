@@ -1,0 +1,18 @@
+DEMO: https://www.youtube.com/watch?v=fdQ2I20hkBU
+
+GitHub Repository of main projects: https://github.com/Briqz23/Interactive_RAG_e-book at /main_LLM_project/
+
+* Note that there are many sideprojects related to the tools I used for the main project. These are kept within the same repo, but at the "side_projects_*" folders.
+
+
+Medium for the backend: https://medium.com/@danielbriquez/building-an-ai-powered-api-for-interacting-with-alices-wonderland-characters-using-fastapi-and-c14ec5d2b0e6
+
+Medium for the frontend (just image generation): https://medium.com/@danielbriquez/creating-simple-surrealistic-art-style-images-with-hugging-face-789bf4d3ba31
+
+__
+
+Side project for Proficient Machine Learning and Data Preparation: https://github.com/Briqz23/titanic-dataset-ML/blob/main/classification.ipynb
+
+
+
+
